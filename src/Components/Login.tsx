@@ -15,7 +15,7 @@ import { LockOpen } from "@material-ui/icons";
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import diariesApi from "../diariesApi";
-import { saveToken, setAuthState } from "../diariesSlice";
+import { saveToken, setAuthState, setUser } from "../diariesSlice";
 import { useAppDispatch } from "../hooks";
 
 const useStyles = makeStyles((theme) => ({
@@ -42,7 +42,7 @@ const Login: React.FC = () => {
 
         dispatch(saveToken(user.token));
         dispatch(setAuthState(true));
-        // dispatch(setUser(auth.token));
+        dispatch(setUser(user));
         console.log("login succesfull", user);
       } catch (error) {
         console.log("login error", error);
@@ -64,7 +64,7 @@ const Login: React.FC = () => {
           }
         ></CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} autoComplete="off">
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <TextField
@@ -72,6 +72,8 @@ const Login: React.FC = () => {
                   label="Username"
                   variant="outlined"
                   fullWidth
+                  value="tester"
+                  autoComplete="off"
                 />
               </Grid>
               <Grid item xs={12}>
@@ -81,12 +83,14 @@ const Login: React.FC = () => {
                   variant="outlined"
                   type="password"
                   fullWidth
+                  value="password"
+                  autoComplete="off"
                 />
               </Grid>
               <Grid item xs={12}>
                 <Button
                   variant="contained"
-                  // color="primary"
+                  color="primary"
                   type="submit"
                   fullWidth
                 >

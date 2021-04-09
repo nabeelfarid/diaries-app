@@ -10,11 +10,11 @@ import {
   TextField,
   Typography,
 } from "@material-ui/core";
-import { green, pink } from "@material-ui/core/colors";
-import { ExitToApp, LockOpen } from "@material-ui/icons";
+import { pink } from "@material-ui/core/colors";
+import { ExitToApp } from "@material-ui/icons";
 import { useRef } from "react";
 import diariesApi from "../diariesApi";
-import { saveToken, setAuthState } from "../diariesSlice";
+import { saveToken, setAuthState, setUser } from "../diariesSlice";
 import { useAppDispatch } from "../hooks";
 import { useNavigate } from "react-router-dom";
 
@@ -44,6 +44,7 @@ const Signup: React.FC = () => {
         console.log("token:", user.token);
         dispatch(saveToken(user.token));
         dispatch(setAuthState(true));
+        dispatch(setUser(user));
         console.log("signup succesfull", user);
       } catch (error) {
         console.log("signup error", error);

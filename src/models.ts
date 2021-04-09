@@ -1,11 +1,15 @@
 export interface Diary {
-  id: string;
+  id: number;
   title: string;
+  subtitle: string;
+  public: boolean;
   userId: string;
-  random: string;
+  created: number;
+  updated: number;
 }
 
 export interface User {
+  id: number;
   username: string;
   password: string;
   email: string;

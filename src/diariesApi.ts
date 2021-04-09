@@ -1,5 +1,5 @@
-import axios, { AxiosError, AxiosResponse } from "axios";
-import { User } from "./models";
+import axios, { AxiosError } from "axios";
+import { Diary, User } from "./models";
 
 const ApiBaseUrl = "";
 interface AuthResponse {
@@ -26,6 +26,7 @@ axiosInstance.interceptors.response.use(
     // Do something with response data
 
     // Only return data
+    console.log("azio instance response :", response.data);
     return response.data;
   },
   (error: AxiosError) => {
@@ -90,8 +91,19 @@ const signup = async (
   return user;
 };
 
+const getUserDiaries = async (userId: number): Promise<Diary[]> => {
+  let { diaries } = await axiosInstance.get<null, { diaries: Diary[] }>(
+    `/api/user/${userId}/diaries`
+  );
+
+  console.log("Diaries Api - getUserDiaries:", diaries);
+
+  return diaries;
+};
+
 const DiariesApi = {
   login,
   signup,
+  getUserDiaries,
 };
 export default DiariesApi;

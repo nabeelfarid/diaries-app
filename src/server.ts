@@ -3,18 +3,11 @@ import {
   Model,
   Request,
   Response,
-  Registry,
   hasMany,
   belongsTo,
   Factory,
-  JSONAPISerializer,
   Serializer,
-  Server,
 } from "miragejs";
-import { ModelDefinition } from "miragejs/-types";
-
-import Schema from "miragejs/orm/schema";
-import { SerializerInterface } from "miragejs/serializer";
 
 const ApplicationSerializer = Serializer.extend({
   // will always serialize the ids of all relationships for the model or collection in the response
@@ -57,6 +50,18 @@ const MakeServer = ({ environment = "test" } = {}) => {
         title(i: number) {
           return `Diary ${i}`;
         },
+        subtitle(i: number) {
+          return `Subtitle of diary ${i} `;
+        },
+        public(i: number) {
+          return Math.random() - 0.5 > 0 ? true : false;
+        },
+        created(i: number) {
+          return Date.now();
+        },
+        updated(i: number) {
+          return Date.now();
+        },
       }),
       entry: Factory.extend({
         title(i: number) {
@@ -67,9 +72,9 @@ const MakeServer = ({ environment = "test" } = {}) => {
 
     seeds: (server) => {
       let user = server.create("user");
-      let diaries = server.createList("diary", 2, {
+      let diaries = server.createList("diary", 10, {
         user,
-        subtitle: "some subtitle",
+        // subtitle: "some subtitle",
         // entries: server.createList("entry",2),
       });
       diaries.forEach((diary) => {
@@ -111,8 +116,17 @@ const MakeServer = ({ environment = "test" } = {}) => {
       });
 
       //Get User Diaries
-      this.get("/diaries", (schema: any) => {
-        return schema.users.find(1).diaries;
+      this.get("/user/:id/diaries", (schema: any, request: Request) => {
+        let id = request.params.id;
+        let user = schema.users.find(id);
+
+        if (user) {
+          // const diaries = user.diaries;
+          // debugger;
+          return user.diaries;
+        } else {
+          return [];
+        }
       });
 
       //Get diary by id

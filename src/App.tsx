@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Routes, Route, Link, Navigate } from "react-router-dom";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
@@ -9,6 +9,8 @@ import {
   Typography,
   Box,
   Container,
+  Switch,
+  Tooltip,
 } from "@material-ui/core";
 import { GitHub } from "@material-ui/icons";
 import Diaries from "./Components/Diaries";
@@ -18,17 +20,27 @@ import Signup from "./Components/Signup";
 import { useAppSelector } from "./hooks";
 import { selectDiariesAppState } from "./diariesSlice";
 import { lightBlue } from "@material-ui/core/colors";
-import { spacing } from "@material-ui/system";
-
-const darkTheme = createMuiTheme({
-  palette: {
-    type: "dark",
-    primary: lightBlue,
-  },
-});
+import { PaletteOptions } from "@material-ui/core/styles/createPalette";
 
 const App = () => {
+  const [darkState, setDarkState] = useState(true);
+  // const palletType = darkState ? "dark" : "light";
+  const lightPallet: PaletteOptions = {
+    type: "light",
+  };
+  const darkPallet: PaletteOptions = {
+    type: "dark",
+    primary: lightBlue,
+  };
+  const theme = createMuiTheme({
+    palette: darkState ? darkPallet : lightPallet,
+  });
+
   const { isAuthenticated } = useAppSelector(selectDiariesAppState);
+
+  const handleThemeChange = () => {
+    setDarkState(!darkState);
+  };
 
   useEffect(() => {
     const callDiariesApi = async () => {
@@ -57,9 +69,9 @@ const App = () => {
   }, []);
   return (
     <>
-      <ThemeProvider theme={darkTheme}>
+      <ThemeProvider theme={theme}>
         <CssBaseline>
-          <AppBar position="relative" color="default">
+          <AppBar position="relative" color="inherit">
             <Toolbar>
               <Typography
                 variant="h6"
@@ -70,14 +82,18 @@ const App = () => {
                 Diaries App
               </Typography>
               <Box flexGrow={1} />
-              <IconButton
-                aria-label="github"
-                href="https://github.com/nabeelfarid/diaries-app"
-                target="blank"
-                title="Github Repo"
-              >
-                <GitHub />
-              </IconButton>
+              <Tooltip title="Toggle dark/light theme">
+                <Switch checked={darkState} onChange={handleThemeChange} />
+              </Tooltip>
+              <Tooltip title="Github Repo">
+                <IconButton
+                  aria-label="github"
+                  href="https://github.com/nabeelfarid/diaries-app"
+                  target="blank"
+                >
+                  <GitHub />
+                </IconButton>
+              </Tooltip>
             </Toolbar>
           </AppBar>
           <Container>
