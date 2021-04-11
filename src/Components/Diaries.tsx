@@ -1,7 +1,14 @@
 import { createStyles, Theme, makeStyles } from "@material-ui/core/styles";
 import { useAppSelector, useAppDispatch } from "../hooks";
-import { selectDiariesAppState, setDiaries } from "../diariesSlice";
-import React, { useEffect } from "react";
+import {
+  selectDiariesAppState,
+  setDiaries,
+  setSelectedDiary,
+  addDiary,
+  updateDiary,
+  setEntries,
+} from "../diariesSlice";
+import React, { useEffect, useRef } from "react";
 import diariesApi from "../diariesApi";
 import {
   Box,
@@ -19,6 +26,14 @@ import {
   ListItemAvatar,
   Avatar,
   Badge,
+  TextField,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  DialogContent,
+  FormControlLabel,
+  Switch,
 } from "@material-ui/core";
 
 import {
@@ -30,6 +45,8 @@ import {
   Public,
 } from "@material-ui/icons";
 import { green, pink } from "@material-ui/core/colors";
+import { Diary } from "../models";
+import { useNavigate } from "react-router-dom";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -47,18 +64,45 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const Diaries: React.FC = () => {
   const classes = useStyles();
-  const { user, diaries } = useAppSelector(selectDiariesAppState);
+  const navigate = useNavigate();
+  const { user, diaries, selectedDiary } = useAppSelector(
+    selectDiariesAppState
+  );
   const dispatch = useAppDispatch();
+  const [open, setOpen] = React.useState(false);
+  const [formValues, setFormValues] = React.useState(
+    selectedDiary
+      ? {
+          title: selectedDiary.title,
+          subtitle: selectedDiary.subtitle,
+          isPublic: selectedDiary.isPublic,
+        }
+      : { title: "", subtitle: "", isPublic: true }
+  );
+  // const txtTitle = useRef<HTMLInputElement>(null);
+  // const txtSubtitle = useRef<HTMLInputElement>(null);
+  // const chkPublic = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    setFormValues(
+      selectedDiary
+        ? {
+            title: selectedDiary.title,
+            subtitle: selectedDiary.subtitle,
+            isPublic: selectedDiary.isPublic,
+          }
+        : { title: "", subtitle: "", isPublic: true }
+    );
+  }, [selectedDiary]);
 
   useEffect(() => {
     const getUserDiaries = async () => {
-      if (user) {
+      if (user && diaries.length === 0) {
         try {
           let diaries = await diariesApi.getUserDiaries(user.id);
 
           dispatch(setDiaries(diaries));
+          dispatch(setSelectedDiary(null));
           console.log("geUserDiaries succesfull", diaries);
-          console.log("geUserDiaries succesfull", diaries.length);
         } catch (error) {
           console.log("geUserDiaries error", error);
         } finally {
@@ -67,71 +111,240 @@ const Diaries: React.FC = () => {
     };
 
     getUserDiaries();
-  }, [dispatch, user]);
+  }, [dispatch, user, diaries.length]);
+
+  const handleEdit = (diary: Diary) => {
+    dispatch(setSelectedDiary(diary));
+    setOpen(true);
+  };
+
+  const handleCreate = () => {
+    dispatch(setSelectedDiary(null));
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleViewEntries = (diary: Diary) => {
+    dispatch(setSelectedDiary(diary));
+    dispatch(setEntries([]));
+    setOpen(false);
+    navigate(`/diaries/${diary.id}/entries`, { replace: true });
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const createDiary = async () => {
+      if (user) {
+        try {
+          // let title = txtTitle.current?.value as string;
+          // let subtitle = txtSubtitle.current?.value as string;
+          // let isPublic = chkPublic.current?.checked as boolean;
+
+          // console.log(title, subtitle, isPublic);
+          console.log(formValues);
+          let diary: Diary;
+          if (selectedDiary) {
+            diary = await diariesApi.editDiary(
+              selectedDiary.id,
+              formValues.title,
+              formValues.subtitle,
+              formValues.isPublic,
+              user.id
+            );
+            dispatch(updateDiary(diary));
+          } else {
+            diary = await diariesApi.createDiary(
+              formValues.title,
+              formValues.subtitle,
+              formValues.isPublic,
+              user.id
+            );
+            dispatch(addDiary(diary));
+          }
+          dispatch(setSelectedDiary(null));
+          setOpen(false);
+          console.log("Diary created/edit succesfully", diary);
+        } catch (error) {
+          console.log("Create/Edit Diary Error", error);
+        } finally {
+        }
+      }
+    };
+
+    createDiary();
+  };
 
   return (
-    <Box mx="auto" maxWidth={600}>
-      <Grid container spacing={2} alignItems="center">
-        <Grid item xs={6}>
-          <Typography variant="h4">Your Diaries</Typography>
-        </Grid>
-        <Grid item xs={6}>
-          <Box textAlign="right">
-            <Fab color="primary" aria-label="add">
-              <Add />
-            </Fab>
-          </Box>
-        </Grid>
-        {diaries && diaries.length > 0 && (
-          <Grid item xs={12}>
-            <Card variant="outlined">
-              <CardContent>
-                <List>
-                  {diaries.map((diary) => (
-                    <>
-                      {console.log(`Diary-${diary.id}`)}
-                      <ListItem key={`Diary-${diary.id}`} button>
-                        <ListItemAvatar>
-                          <Avatar
-                            className={
-                              diary.public ? classes.green : classes.pink
-                            }
-                          >
-                            {diary.public ? <Public /> : <Lock />}
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={diary.title}
-                          secondary={new Date(diary.updated).toDateString()}
-                        />
-                        <ListItemSecondaryAction>
-                          <IconButton aria-label="delete">
-                            <Delete />
-                          </IconButton>
-                          <IconButton aria-label="edit">
-                            <Edit />
-                          </IconButton>
-                          <IconButton aria-label="view">
-                            <Badge badgeContent={4} color="secondary">
-                              <LibraryBooks />
-                            </Badge>
-                          </IconButton>
-                        </ListItemSecondaryAction>
-                      </ListItem>
-                      <Divider
-                        variant="fullWidth"
-                        component="li"
-                        key={`Divider-${diary.id}`}
-                      />
-                    </>
-                  ))}
-                </List>
-              </CardContent>
-            </Card>
+    <>
+      <Box mx="auto" maxWidth={600}>
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={6}>
+            <Typography variant="h4">Your Diaries</Typography>
           </Grid>
-        )}
-      </Grid>
-    </Box>
+          <Grid item xs={6}>
+            <Box textAlign="right">
+              <Fab
+                color="primary"
+                aria-label="create-new-diary"
+                onClick={handleCreate}
+              >
+                <Add />
+              </Fab>
+            </Box>
+          </Grid>
+          {diaries && diaries.length > 0 && (
+            <Grid item xs={12}>
+              <Card variant="outlined">
+                <CardContent>
+                  <List>
+                    {diaries
+                      // .sort((a, b) => b.updated - a.updated)
+                      .map((diary) => (
+                        <React.Fragment key={`Diary-${diary.id}`}>
+                          <ListItem key={`ListItem-${diary.id}`} button>
+                            <ListItemAvatar>
+                              <Avatar
+                                className={
+                                  diary.isPublic ? classes.green : classes.pink
+                                }
+                              >
+                                {diary.isPublic ? <Public /> : <Lock />}
+                              </Avatar>
+                            </ListItemAvatar>
+                            <ListItemText
+                              primary={diary.title}
+                              secondary={new Date(diary.updated).toDateString()}
+                            />
+                            <ListItemSecondaryAction>
+                              <IconButton aria-label="delete">
+                                <Delete />
+                              </IconButton>
+                              <IconButton
+                                aria-label="edit"
+                                onClick={() => handleEdit(diary)}
+                              >
+                                <Edit />
+                              </IconButton>
+                              <IconButton
+                                aria-label="view"
+                                onClick={() => handleViewEntries(diary)}
+                              >
+                                <Badge
+                                  badgeContent={diary.entryIds.length}
+                                  color="secondary"
+                                >
+                                  <LibraryBooks />
+                                </Badge>
+                              </IconButton>
+                            </ListItemSecondaryAction>
+                          </ListItem>
+                          <Divider
+                            variant="fullWidth"
+                            component="li"
+                            key={`Divider-${diary.id}`}
+                          />
+                        </React.Fragment>
+                      ))}
+                  </List>
+                </CardContent>
+              </Card>
+            </Grid>
+          )}
+        </Grid>
+      </Box>
+
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="create-new-diary"
+      >
+        <DialogTitle id="form-dialog-create-new-diary">
+          <Box display="flex" alignItems="center">
+            <Box mr={2}>
+              <Avatar className={classes.green}>
+                {selectedDiary ? <Edit /> : <Add />}
+              </Avatar>
+            </Box>
+            <Typography variant="h5">
+              {selectedDiary
+                ? `Edit Diary: ${selectedDiary.title}`
+                : `Create New Diary`}
+            </Typography>
+          </Box>
+        </DialogTitle>
+        <form onSubmit={handleSubmit} autoComplete="off">
+          <DialogContent dividers>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  // inputRef={txtTitle}
+                  value={formValues.title}
+                  label="Title"
+                  variant="outlined"
+                  fullWidth
+                  // defaultValue={selectedDiary ? selectedDiary.title : ``}
+                  autoFocus
+                  onChange={(e) =>
+                    setFormValues({
+                      ...formValues,
+                      title: e.target.value,
+                    })
+                  }
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  // inputRef={txtSubtitle}
+                  value={formValues.subtitle}
+                  label="Subtitle"
+                  variant="outlined"
+                  fullWidth
+                  // defaultValue={selectedDiary ? selectedDiary.subtitle : ``}
+                  onChange={(e) =>
+                    setFormValues({
+                      ...formValues,
+                      subtitle: e.target.value,
+                    })
+                  }
+                />
+              </Grid>
+              <Grid item>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      // name="chkIsPublic"
+                      // inputRef={chkPublic}
+                      // defaultChecked={
+                      //   selectedDiary ? selectedDiary.isPublic : true
+                      // }
+                      checked={formValues.isPublic}
+                      onChange={(e) =>
+                        setFormValues({
+                          ...formValues,
+                          isPublic: e.target.checked,
+                        })
+                      }
+                    />
+                  }
+                  label="Is it a Public Diary?"
+                />
+              </Grid>
+            </Grid>
+          </DialogContent>
+
+          {/* </Box> */}
+          <DialogActions>
+            <Button onClick={handleClose}>Cancel</Button>
+            <Button variant="contained" color="primary" type="submit">
+              Save
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+    </>
   );
 };
 

@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { Diary, User } from "./models";
+import { Diary, Entry, User } from "./models";
 
 const ApiBaseUrl = "";
 interface AuthResponse {
@@ -101,9 +101,115 @@ const getUserDiaries = async (userId: number): Promise<Diary[]> => {
   return diaries;
 };
 
+const getDiary = async (diaryId: number): Promise<Diary> => {
+  let { diary } = await axiosInstance.get<null, { diary: Diary }>(
+    `/api/diaries/${diaryId}`
+  );
+
+  console.log("Diaries Api - getDiary:", diary);
+
+  return diary;
+};
+
+const createDiary = async (
+  title: string,
+  subtitle: string,
+  isPublic: boolean,
+  userId: number
+): Promise<Diary> => {
+  //   try {
+  let { diary } = await axiosInstance.post<Partial<Diary>, { diary: Diary }>(
+    `/api/diaries`,
+    {
+      title,
+      subtitle,
+      isPublic,
+      userId,
+    }
+  );
+  console.log("Diaries Api - Cratae Diary:", diary);
+
+  return diary;
+};
+
+const editDiary = async (
+  id: number,
+  title: string,
+  subtitle: string,
+  isPublic: boolean,
+  userId: number
+): Promise<Diary> => {
+  //   try {
+  let { diary } = await axiosInstance.put<Partial<Diary>, { diary: Diary }>(
+    `/api/diaries/${id}`,
+    {
+      id,
+      title,
+      subtitle,
+      isPublic,
+      userId,
+    }
+  );
+  console.log("Diaries Api - Edit Diary:", diary);
+
+  return diary;
+};
+
+const getEntries = async (diaryId: number): Promise<Entry[]> => {
+  let { entries } = await axiosInstance.get<null, { entries: Entry[] }>(
+    `/api/diaries/${diaryId}/entries`
+  );
+
+  console.log("Diaries Api - getEntries:", entries);
+
+  return entries;
+};
+
+const createEntry = async (
+  title: string,
+  content: string,
+  diaryId: number
+): Promise<Entry> => {
+  let { entry } = await axiosInstance.post<Partial<Entry>, { entry: Entry }>(
+    `/api/entries`,
+    {
+      title,
+      content,
+      diaryId,
+    }
+  );
+  console.log("Diaries Api - Cratae Entry:", entry);
+
+  return entry;
+};
+
+const editEntry = async (
+  id: number,
+  title: string,
+  content: string
+): Promise<Entry> => {
+  let { entry } = await axiosInstance.put<Partial<Entry>, { entry: Entry }>(
+    `/api/entries/${id}`,
+    {
+      id,
+      title,
+      content,
+    }
+  );
+  console.log("Diaries Api - Edit Entry:", entry);
+
+  return entry;
+};
+
 const DiariesApi = {
   login,
   signup,
   getUserDiaries,
+  getDiary,
+  createDiary,
+  editDiary,
+  getEntries,
+  createEntry,
+  editEntry,
 };
 export default DiariesApi;

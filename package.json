@@ -60,7 +60,9 @@
     ]
   },
   "devDependencies": {
+    "@types/faker": "^5.5.1",
     "@types/react-redux": "^7.1.16",
+    "faker": "^5.5.3",
     "miragejs": "^0.1.41"
   }
 }

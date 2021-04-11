@@ -14,6 +14,7 @@ import {
 } from "@material-ui/core";
 import { GitHub } from "@material-ui/icons";
 import Diaries from "./Components/Diaries";
+import Entries from "./Components/Entries";
 import About from "./Components/About";
 import Login from "./Components/Login";
 import Signup from "./Components/Signup";
@@ -71,60 +72,70 @@ const App = () => {
     <>
       <ThemeProvider theme={theme}>
         <CssBaseline>
-          <AppBar position="relative" color="inherit">
-            <Toolbar>
-              <Typography
-                variant="h6"
-                component={Link}
-                to="/"
-                style={{ color: "inherit", textDecoration: "inherit" }}
-              >
-                Diaries App
-              </Typography>
-              <Box flexGrow={1} />
-              <Tooltip title="Toggle dark/light theme">
-                <Switch checked={darkState} onChange={handleThemeChange} />
-              </Tooltip>
-              <Tooltip title="Github Repo">
-                <IconButton
-                  aria-label="github"
-                  href="https://github.com/nabeelfarid/diaries-app"
-                  target="blank"
+          <Box minWidth={400}>
+            <AppBar position="relative" color="inherit">
+              <Toolbar>
+                <Typography
+                  variant="h6"
+                  component={Link}
+                  to="/"
+                  style={{ color: "inherit", textDecoration: "inherit" }}
                 >
-                  <GitHub />
-                </IconButton>
-              </Tooltip>
-            </Toolbar>
-          </AppBar>
-          <Container>
-            <Box mt={4}>
-              <Routes>
-                {isAuthenticated ? (
-                  <>
-                    <Route
-                      path="/login"
-                      element={<Navigate to="/" replace={true} />}
-                    />
-                    <Route
-                      path="/signup"
-                      element={<Navigate to="/" replace={true} />}
-                    />
-                    <Route path="/" element={<Diaries />} />
-                  </>
-                ) : (
-                  <>
-                    <Route path="login" element={<Login />} />
-                    <Route path="signup" element={<Signup />} />
-                    <Route path="about" element={<About />} />
-                    <Route
-                      path="*"
-                      element={<Navigate to="login" replace={true} />}
-                    />
-                  </>
-                )}
-              </Routes>
-            </Box>
-          </Container>
+                  Diaries App
+                </Typography>
+                <Box flexGrow={1} />
+                <Tooltip title="Toggle dark/light theme">
+                  <Switch checked={darkState} onChange={handleThemeChange} />
+                </Tooltip>
+                <Tooltip title="Github Repo">
+                  <IconButton
+                    aria-label="github"
+                    href="https://github.com/nabeelfarid/diaries-app"
+                    target="blank"
+                  >
+                    <GitHub />
+                  </IconButton>
+                </Tooltip>
+              </Toolbar>
+            </AppBar>
+            <Container>
+              <Box mt={4}>
+                <Routes>
+                  {isAuthenticated ? (
+                    <>
+                      <Route
+                        path="/"
+                        element={<Navigate to="/diaries" replace={true} />}
+                      />
+                      <Route
+                        path="login"
+                        element={<Navigate to="/diaries" replace={true} />}
+                      />
+                      <Route
+                        path="signup"
+                        element={<Navigate to="/diaries" replace={true} />}
+                      />
+                      <Route path="diaries" element={<Diaries />} />
+                      <Route
+                        path="diaries/:diaryId/entries"
+                        element={<Entries />}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <Route path="login" element={<Login />} />
+                      <Route path="signup" element={<Signup />} />
+                      <Route path="about" element={<About />} />
+                      <Route
+                        path="*"
+                        element={<Navigate to="login" replace={true} />}
+                      />
+                    </>
+                  )}
+                </Routes>
+              </Box>
+            </Container>
+          </Box>
         </CssBaseline>
       </ThemeProvider>
     </>
