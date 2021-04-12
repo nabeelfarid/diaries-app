@@ -13,10 +13,14 @@ import {
 import { green } from "@material-ui/core/colors";
 import { LockOpen } from "@material-ui/icons";
 import { useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import diariesApi from "../diariesApi";
 import { saveToken, setAuthState, setUser } from "../diariesSlice";
 import { useAppDispatch } from "../hooks";
+
+interface LocationState {
+  from: { pathname: string };
+}
 
 const useStyles = makeStyles((theme) => ({
   green: {
@@ -26,6 +30,15 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Login: React.FC = () => {
+  // let history = useHistory();
+  let location = useLocation();
+  // let auth = useAuth();
+
+  let { from } = (location.state || {
+    from: { pathname: "/" },
+  }) as LocationState;
+  console.log("from:", from);
+
   const classes = useStyles();
   const navigate = useNavigate();
   const txtUsername = useRef<HTMLInputElement>(null);
@@ -43,6 +56,8 @@ const Login: React.FC = () => {
         dispatch(saveToken(user.token));
         dispatch(setAuthState(true));
         dispatch(setUser(user));
+        navigate(from.pathname, { replace: true });
+
         console.log("login succesfull", user);
       } catch (error) {
         console.log("login error", error);

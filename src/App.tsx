@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Routes, Route, Link, Navigate } from "react-router-dom";
+import { Routes, Route, Link, Navigate, useLocation } from "react-router-dom";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import {
@@ -24,6 +24,8 @@ import { lightBlue } from "@material-ui/core/colors";
 import { PaletteOptions } from "@material-ui/core/styles/createPalette";
 
 const App = () => {
+  let location = useLocation();
+
   const [darkState, setDarkState] = useState(true);
   // const palletType = darkState ? "dark" : "light";
   const lightPallet: PaletteOptions = {
@@ -128,7 +130,13 @@ const App = () => {
                       <Route path="about" element={<About />} />
                       <Route
                         path="*"
-                        element={<Navigate to="login" replace={true} />}
+                        element={
+                          <Navigate
+                            to="login"
+                            state={{ from: location }}
+                            replace={true}
+                          />
+                        }
                       />
                     </>
                   )}
