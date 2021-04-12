@@ -18,6 +18,7 @@ import Entries from "./Components/Entries";
 import About from "./Components/About";
 import Login from "./Components/Login";
 import Signup from "./Components/Signup";
+import ToastAlert from "./Components/ToastAlert";
 import { useAppSelector } from "./hooks";
 import { selectDiariesAppState } from "./diariesSlice";
 import { lightBlue } from "@material-ui/core/colors";
@@ -105,22 +106,14 @@ const App = () => {
                 <Routes>
                   {isAuthenticated ? (
                     <>
-                      <Route
-                        path="/"
-                        element={<Navigate to="/diaries" replace={true} />}
-                      />
-                      <Route
-                        path="login"
-                        element={<Navigate to="/diaries" replace={true} />}
-                      />
-                      <Route
-                        path="signup"
-                        element={<Navigate to="/diaries" replace={true} />}
-                      />
                       <Route path="diaries" element={<Diaries />} />
                       <Route
                         path="diaries/:diaryId/entries"
                         element={<Entries />}
+                      />
+                      <Route
+                        path="*"
+                        element={<Navigate to="/diaries" replace={true} />}
                       />
                     </>
                   ) : (
@@ -144,6 +137,7 @@ const App = () => {
               </Box>
             </Container>
           </Box>
+          <ToastAlert />
         </CssBaseline>
       </ThemeProvider>
     </>

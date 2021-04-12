@@ -25,3 +25,16 @@ export interface Entry {
   created: number;
   updated: number;
 }
+
+export enum ToastType {
+  error = "error",
+  warning = "warning",
+  info = "info",
+  success = "success",
+}
+
+export interface Toast {
+  msg?: string;
+  type?: ToastType;
+  open: boolean;
+}

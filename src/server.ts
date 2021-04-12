@@ -78,7 +78,7 @@ const MakeServer = ({ environment = "test" } = {}) => {
           return faker.random.words(3);
         },
         content(i: number) {
-          return faker.lorem.paragraphs(2);
+          return faker.lorem.paragraphs(10);
         },
         created() {
           //set created date between last 30 days
@@ -110,6 +110,7 @@ const MakeServer = ({ environment = "test" } = {}) => {
     },
 
     routes: function () {
+      this.urlPrefix = "https://www.diaries-app.com";
       this.namespace = "api";
 
       this.post("/login", (schema: any, request: Request) => {
@@ -194,10 +195,19 @@ const MakeServer = ({ environment = "test" } = {}) => {
 
       //Delete Diary
       this.del("/diaries/:id", (schema: any, request: Request) => {
-        let id = request.params.id;
-        let diary = schema.diaries.find(id);
-        diary.destroy();
-        return diary;
+        try {
+          let id = request.params.id;
+          let diary = schema.diaries.find(id);
+          if (diary) {
+            diary.destroy();
+            return diary;
+          }
+          return handleErrors({
+            message: `Diary with id (${id}) does not exist`,
+          });
+        } catch (error) {
+          return handleErrors({ error, message: "Failed to delete Diary." });
+        }
       });
 
       //Get diary entries
@@ -242,6 +252,23 @@ const MakeServer = ({ environment = "test" } = {}) => {
           return entry;
         } catch (error) {
           return handleErrors({ error, message: "Failed to update Entry." });
+        }
+      });
+
+      //Delete Diary
+      this.del("/entries/:id", (schema: any, request: Request) => {
+        try {
+          let id = request.params.id;
+          let entry = schema.entries.find(id);
+          if (entry) {
+            entry.destroy();
+            return entry;
+          }
+          return handleErrors({
+            message: `Entry with id (${id}) does not exist`,
+          });
+        } catch (error) {
+          return handleErrors({ error, message: "Failed to delete Entry." });
         }
       });
     },

@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Diary, Entry, User } from "./models";
+import { Diary, Entry, Toast, ToastType, User } from "./models";
 import type { RootState } from "./store";
 
 // Type for the slice state
@@ -11,6 +11,7 @@ interface DiariesAppState {
   selectedDiary: Diary | null;
   entries: Entry[];
   selectedEntry: Entry | null;
+  toast: Toast;
 }
 
 // Initial state using the above type
@@ -22,6 +23,7 @@ const initialState: DiariesAppState = {
   selectedDiary: null,
   entries: [],
   selectedEntry: null,
+  toast: { open: false },
 };
 
 // `createSlice` will infer the state type from the `initialState` argument
@@ -62,6 +64,9 @@ const diariesAppSlice = createSlice({
       if (index === -1) return;
       state.diaries[index] = payload;
     },
+    deleteDiary: (state, { payload }: PayloadAction<Diary>) => {
+      state.diaries = state.diaries.filter((diary) => diary.id !== payload.id);
+    },
     setEntries: (state, { payload }: PayloadAction<Entry[]>) => {
       if (payload) {
         state.entries = payload;
@@ -87,9 +92,21 @@ const diariesAppSlice = createSlice({
       //update diary Updated date as well
       let diary = state.diaries.find((diary) => diary.id === payload.diaryId);
       if (diary) {
-        diary.entryIds.push(payload.id);
         diary.updated = payload.updated;
       }
+    },
+    deleteEntry: (state, { payload }: PayloadAction<Entry>) => {
+      state.entries = state.entries.filter((entry) => entry.id !== payload.id);
+      //update corresponding diary entryIds
+      const diary = state.diaries.find((diary) => diary.id === payload.diaryId);
+      if (diary) {
+        diary.entryIds = diary.entryIds.filter(
+          (entryId) => entryId !== payload.id
+        );
+      }
+    },
+    showToast: (state, { payload }: PayloadAction<Toast>) => {
+      state.toast = { ...payload };
     },
   },
 });
@@ -104,10 +121,13 @@ export const {
   setSelectedDiary,
   addDiary,
   updateDiary,
+  deleteDiary,
   setEntries,
   setSelectedEntry,
   addEntry,
   updateEntry,
+  deleteEntry,
+  showToast,
 } = diariesAppSlice.actions;
 // Other code such as selectors can use the imported `RootState` type
 export const selectDiariesAppState = (state: RootState) => state.diariesApp;

@@ -87,7 +87,7 @@ const Login: React.FC = () => {
                   label="Username"
                   variant="outlined"
                   fullWidth
-                  value="tester"
+                  defaultValue="tester"
                   autoComplete="off"
                 />
               </Grid>
@@ -98,7 +98,7 @@ const Login: React.FC = () => {
                   variant="outlined"
                   type="password"
                   fullWidth
-                  value="password"
+                  defaultValue="password"
                   autoComplete="off"
                 />
               </Grid>

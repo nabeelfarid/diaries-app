@@ -7,6 +7,8 @@ import {
   setSelectedEntry,
   addEntry,
   updateEntry,
+  deleteEntry,
+  showToast,
 } from "../diariesSlice";
 import React, { useEffect, useRef } from "react";
 import diariesApi from "../diariesApi";
@@ -32,9 +34,16 @@ import {
   DialogContent,
 } from "@material-ui/core";
 
-import { Edit, Add, Delete, ArrowBack, Replay } from "@material-ui/icons";
+import {
+  Edit,
+  Add,
+  Delete,
+  ArrowBack,
+  Replay,
+  Warning,
+} from "@material-ui/icons";
 import { green, pink } from "@material-ui/core/colors";
-import { Entry } from "../models";
+import { Entry, ToastType } from "../models";
 import { useNavigate, useParams } from "react-router-dom";
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -61,6 +70,10 @@ const Entries: React.FC = () => {
   let { diaryId } = useParams();
 
   const [open, setOpen] = React.useState(false);
+  const [
+    deleteConfirmationDialogOpenCloseState,
+    setDeleteConfirmationDialogOpenCloseState,
+  ] = React.useState(false);
   const txtTitle = useRef<HTMLInputElement>(null);
   const txtContent = useRef<HTMLInputElement>(null);
 
@@ -145,6 +158,13 @@ const Entries: React.FC = () => {
           dispatch(setSelectedEntry(null));
           setOpen(false);
           console.log("Entry created/edit succesfully", entry);
+          dispatch(
+            showToast({
+              type: ToastType.success,
+              open: true,
+              msg: "Entry saved successfully.",
+            })
+          );
         } catch (error) {
           console.log("Create/Edit Entry Error", error);
         } finally {
@@ -153,6 +173,42 @@ const Entries: React.FC = () => {
     };
 
     createEntry();
+  };
+
+  const handleDelete = (entry: Entry) => {
+    dispatch(setSelectedEntry(entry));
+    setDeleteConfirmationDialogOpenCloseState(true);
+  };
+
+  const handleDeleteConfirmationDialogClose = () => {
+    dispatch(setSelectedEntry(null));
+    setDeleteConfirmationDialogOpenCloseState(false);
+  };
+
+  const handleConfirmDelete = () => {
+    const delEntry = async () => {
+      if (selectedEntry) {
+        try {
+          let entry = await diariesApi.deleteEntry(selectedEntry.id);
+          dispatch(deleteEntry(entry));
+          dispatch(setSelectedEntry(null));
+          setDeleteConfirmationDialogOpenCloseState(false);
+          console.log("Entry deleted succesfully", entry);
+          dispatch(
+            showToast({
+              type: ToastType.success,
+              open: true,
+              msg: "Entry deleted successfully.",
+            })
+          );
+        } catch (error) {
+          console.log("Delete Entry Error", error);
+        } finally {
+        }
+      }
+    };
+
+    delEntry();
   };
 
   return (
@@ -205,7 +261,10 @@ const Entries: React.FC = () => {
                                   ).toDateString()}
                                 />
                                 <ListItemSecondaryAction>
-                                  <IconButton aria-label="delete">
+                                  <IconButton
+                                    aria-label="delete"
+                                    onClick={() => handleDelete(entry)}
+                                  >
                                     <Delete />
                                   </IconButton>
                                   <IconButton
@@ -265,6 +324,9 @@ const Entries: React.FC = () => {
                   </Grid>
                   <Grid item xs={12}>
                     <TextField
+                      multiline
+                      rows={4}
+                      rowsMax={10}
                       inputRef={txtContent}
                       label="Content"
                       variant="outlined"
@@ -283,6 +345,41 @@ const Entries: React.FC = () => {
                 </Button>
               </DialogActions>
             </form>
+          </Dialog>
+
+          <Dialog
+            open={deleteConfirmationDialogOpenCloseState}
+            onClose={handleDeleteConfirmationDialogClose}
+            aria-labelledby="delete-entry"
+          >
+            <DialogTitle id="form-dialog-delete-entry">
+              <Box display="flex" alignItems="center">
+                <Box mr={2}>
+                  <Avatar className={classes.pink}>
+                    <Warning />
+                  </Avatar>
+                </Box>
+                <Typography variant="h5">Are you sure?</Typography>
+              </Box>
+            </DialogTitle>
+            <DialogContent>
+              <Box mb={2} textAlign="center">
+                <Button
+                  style={{ marginRight: "16px" }}
+                  variant="outlined"
+                  onClick={handleDeleteConfirmationDialogClose}
+                >
+                  No
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleConfirmDelete}
+                >
+                  Yes
+                </Button>
+              </Box>
+            </DialogContent>
           </Dialog>
         </>
       )}

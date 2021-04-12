@@ -6,7 +6,9 @@ import {
   setSelectedDiary,
   addDiary,
   updateDiary,
+  deleteDiary,
   setEntries,
+  showToast,
 } from "../diariesSlice";
 import React, { useEffect, useRef } from "react";
 import diariesApi from "../diariesApi";
@@ -43,10 +45,12 @@ import {
   Delete,
   Lock,
   Public,
+  Warning,
 } from "@material-ui/icons";
 import { green, pink } from "@material-ui/core/colors";
-import { Diary } from "../models";
+import { Diary, ToastType } from "../models";
 import { useNavigate } from "react-router-dom";
+import { Alert } from "@material-ui/lab";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -70,6 +74,10 @@ const Diaries: React.FC = () => {
   );
   const dispatch = useAppDispatch();
   const [open, setOpen] = React.useState(false);
+  const [
+    deleteConfirmationDialogOpenCloseState,
+    setDeleteConfirmationDialogOpenCloseState,
+  ] = React.useState(false);
   const [formValues, setFormValues] = React.useState(
     selectedDiary
       ? {
@@ -111,18 +119,14 @@ const Diaries: React.FC = () => {
     getUserDiaries();
   }, [dispatch, user, diaries.length]);
 
-  const handleEdit = (diary: Diary) => {
-    dispatch(setSelectedDiary(diary));
-    setOpen(true);
-  };
-
   const handleCreate = () => {
     dispatch(setSelectedDiary(null));
     setOpen(true);
   };
 
-  const handleClose = () => {
-    setOpen(false);
+  const handleEdit = (diary: Diary) => {
+    dispatch(setSelectedDiary(diary));
+    setOpen(true);
   };
 
   const handleViewEntries = (diary: Diary) => {
@@ -132,7 +136,12 @@ const Diaries: React.FC = () => {
     navigate(`/diaries/${diary.id}/entries`, { replace: true });
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleClose = () => {
+    dispatch(setSelectedDiary(null));
+    setOpen(false);
+  };
+
+  const handleCreateEditSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const createDiary = async () => {
       if (user) {
@@ -160,6 +169,13 @@ const Diaries: React.FC = () => {
           dispatch(setSelectedDiary(null));
           setOpen(false);
           console.log("Diary created/edit succesfully", diary);
+          dispatch(
+            showToast({
+              type: ToastType.success,
+              open: true,
+              msg: "Diary saved successfully.",
+            })
+          );
         } catch (error) {
           console.log("Create/Edit Diary Error", error);
         } finally {
@@ -168,6 +184,42 @@ const Diaries: React.FC = () => {
     };
 
     createDiary();
+  };
+
+  const handleDelete = (diary: Diary) => {
+    dispatch(setSelectedDiary(diary));
+    setDeleteConfirmationDialogOpenCloseState(true);
+  };
+
+  const handleDeleteConfirmationDialogClose = () => {
+    dispatch(setSelectedDiary(null));
+    setDeleteConfirmationDialogOpenCloseState(false);
+  };
+
+  const handleConfirmDelete = () => {
+    const delDiary = async () => {
+      if (selectedDiary) {
+        try {
+          let diary = await diariesApi.deleteDiary(selectedDiary.id);
+          dispatch(deleteDiary(diary));
+          dispatch(setSelectedDiary(null));
+          setDeleteConfirmationDialogOpenCloseState(false);
+          console.log("Diary deleted succesfully", diary);
+          dispatch(
+            showToast({
+              type: ToastType.success,
+              open: true,
+              msg: "Diary deleted successfully.",
+            })
+          );
+        } catch (error) {
+          console.log("Delete Diary Error", error);
+        } finally {
+        }
+      }
+    };
+
+    delDiary();
   };
 
   return (
@@ -212,7 +264,10 @@ const Diaries: React.FC = () => {
                               secondary={new Date(diary.updated).toDateString()}
                             />
                             <ListItemSecondaryAction>
-                              <IconButton aria-label="delete">
+                              <IconButton
+                                aria-label="delete"
+                                onClick={() => handleDelete(diary)}
+                              >
                                 <Delete />
                               </IconButton>
                               <IconButton
@@ -268,7 +323,7 @@ const Diaries: React.FC = () => {
             </Typography>
           </Box>
         </DialogTitle>
-        <form onSubmit={handleSubmit} autoComplete="off">
+        <form onSubmit={handleCreateEditSubmit}>
           <DialogContent dividers>
             <Grid container spacing={2}>
               <Grid item xs={12}>
@@ -326,6 +381,41 @@ const Diaries: React.FC = () => {
             </Button>
           </DialogActions>
         </form>
+      </Dialog>
+
+      <Dialog
+        open={deleteConfirmationDialogOpenCloseState}
+        onClose={handleDeleteConfirmationDialogClose}
+        aria-labelledby="delete-diary"
+      >
+        <DialogTitle id="form-dialog-delete-diary">
+          <Box display="flex" alignItems="center">
+            <Box mr={2}>
+              <Avatar className={classes.pink}>
+                <Warning />
+              </Avatar>
+            </Box>
+            <Typography variant="h5">Are you sure?</Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Box mb={2} textAlign="center">
+            <Button
+              style={{ marginRight: "16px" }}
+              variant="outlined"
+              onClick={handleDeleteConfirmationDialogClose}
+            >
+              No
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleConfirmDelete}
+            >
+              Yes
+            </Button>
+          </Box>
+        </DialogContent>
       </Dialog>
     </>
   );
