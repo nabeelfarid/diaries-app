@@ -210,10 +210,14 @@ const MakeServer = ({ environment = "test" } = {}) => {
       this.post("/entries", (schema: any, request: Request) => {
         try {
           let attrs = JSON.parse(request.requestBody);
-          let newEntry = schema.diaries.find(attrs.diaryId).createEntry({
+          let diary = schema.diaries.find(attrs.diaryId);
+          let newEntry = diary.createEntry({
             ...attrs,
             created: Date.now(),
             updated: Date.now(),
+          });
+          diary.update({
+            updated: newEntry.updated,
           });
           return newEntry;
         } catch (error) {
@@ -227,9 +231,13 @@ const MakeServer = ({ environment = "test" } = {}) => {
           let id = request.params.id;
           let attrs = JSON.parse(request.requestBody);
           let entry = schema.entries.find(id);
+          let diary = schema.diaries.find(entry.diaryId);
           entry.update({
             ...attrs,
             updated: Date.now(),
+          });
+          diary.update({
+            updated: entry.updated,
           });
           return entry;
         } catch (error) {

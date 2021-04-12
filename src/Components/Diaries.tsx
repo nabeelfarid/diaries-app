@@ -79,10 +79,8 @@ const Diaries: React.FC = () => {
         }
       : { title: "", subtitle: "", isPublic: true }
   );
-  // const txtTitle = useRef<HTMLInputElement>(null);
-  // const txtSubtitle = useRef<HTMLInputElement>(null);
-  // const chkPublic = useRef<HTMLInputElement>(null);
   useEffect(() => {
+    console.log("selectedDiary:", selectedDiary);
     setFormValues(
       selectedDiary
         ? {
@@ -92,7 +90,7 @@ const Diaries: React.FC = () => {
           }
         : { title: "", subtitle: "", isPublic: true }
     );
-  }, [selectedDiary]);
+  }, [open]);
 
   useEffect(() => {
     const getUserDiaries = async () => {
@@ -139,11 +137,6 @@ const Diaries: React.FC = () => {
     const createDiary = async () => {
       if (user) {
         try {
-          // let title = txtTitle.current?.value as string;
-          // let subtitle = txtSubtitle.current?.value as string;
-          // let isPublic = chkPublic.current?.checked as boolean;
-
-          // console.log(title, subtitle, isPublic);
           console.log(formValues);
           let diary: Diary;
           if (selectedDiary) {
@@ -200,8 +193,8 @@ const Diaries: React.FC = () => {
               <Card variant="outlined">
                 <CardContent>
                   <List>
-                    {diaries
-                      // .sort((a, b) => b.updated - a.updated)
+                    {[...diaries]
+                      .sort((a, b) => b.updated - a.updated)
                       .map((diary) => (
                         <React.Fragment key={`Diary-${diary.id}`}>
                           <ListItem key={`ListItem-${diary.id}`} button>
@@ -280,12 +273,10 @@ const Diaries: React.FC = () => {
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <TextField
-                  // inputRef={txtTitle}
                   value={formValues.title}
                   label="Title"
                   variant="outlined"
                   fullWidth
-                  // defaultValue={selectedDiary ? selectedDiary.title : ``}
                   autoFocus
                   onChange={(e) =>
                     setFormValues({
@@ -297,12 +288,10 @@ const Diaries: React.FC = () => {
               </Grid>
               <Grid item xs={12}>
                 <TextField
-                  // inputRef={txtSubtitle}
                   value={formValues.subtitle}
                   label="Subtitle"
                   variant="outlined"
                   fullWidth
-                  // defaultValue={selectedDiary ? selectedDiary.subtitle : ``}
                   onChange={(e) =>
                     setFormValues({
                       ...formValues,
@@ -315,11 +304,6 @@ const Diaries: React.FC = () => {
                 <FormControlLabel
                   control={
                     <Switch
-                      // name="chkIsPublic"
-                      // inputRef={chkPublic}
-                      // defaultChecked={
-                      //   selectedDiary ? selectedDiary.isPublic : true
-                      // }
                       checked={formValues.isPublic}
                       onChange={(e) =>
                         setFormValues({
@@ -335,7 +319,6 @@ const Diaries: React.FC = () => {
             </Grid>
           </DialogContent>
 
-          {/* </Box> */}
           <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>
             <Button variant="contained" color="primary" type="submit">

@@ -47,22 +47,10 @@ const diariesAppSlice = createSlice({
     },
     setDiaries: (state, { payload }: PayloadAction<Diary[]>) => {
       if (payload) {
-        //sort by date descending
-        // payload.sort((a, b) => b.updated - a.updated);
         state.diaries = payload;
       }
     },
     setSelectedDiary: (state, { payload }: PayloadAction<Diary | null>) => {
-      // if (payload) {
-      //   let index = state.diaries.findIndex((diary) => diary.id === payload.id);
-      //   if (index === -1) {
-      //     state.selectedDiary = null;
-      //   } else {
-      //     state.selectedDiary = state.diaries[index];
-      //   }
-      // } else {
-      //   state.selectedDiary = null;
-      // }
       state.selectedDiary = payload;
     },
     addDiary: (state, { payload }: PayloadAction<Diary>) => {
@@ -76,8 +64,6 @@ const diariesAppSlice = createSlice({
     },
     setEntries: (state, { payload }: PayloadAction<Entry[]>) => {
       if (payload) {
-        //sort by date descending
-        // payload.sort((a, b) => b.updated - a.updated);
         state.entries = payload;
       }
     },
@@ -87,14 +73,23 @@ const diariesAppSlice = createSlice({
     addEntry: (state, { payload }: PayloadAction<Entry>) => {
       //add new items to the begning of the entries
       state.entries.unshift(payload);
-      //update corresponding diary with the new entryid
+      //update corresponding diary with the new entryid and updated date
       let diary = state.diaries.find((diary) => diary.id === payload.diaryId);
-      diary?.entryIds.push(payload.id);
+      if (diary) {
+        diary.entryIds.push(payload.id);
+        diary.updated = payload.updated;
+      }
     },
     updateEntry: (state, { payload }: PayloadAction<Entry>) => {
       let index = state.entries.findIndex((entry) => entry.id === payload.id);
       if (index === -1) return;
       state.entries[index] = payload;
+      //update diary Updated date as well
+      let diary = state.diaries.find((diary) => diary.id === payload.diaryId);
+      if (diary) {
+        diary.entryIds.push(payload.id);
+        diary.updated = payload.updated;
+      }
     },
   },
 });

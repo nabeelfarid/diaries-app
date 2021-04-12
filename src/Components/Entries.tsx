@@ -193,7 +193,7 @@ const Entries: React.FC = () => {
                   <Card variant="outlined">
                     <CardContent>
                       <List>
-                        {entries
+                        {[...entries]
                           .sort((a, b) => b.updated - a.updated)
                           .map((entry) => (
                             <React.Fragment key={`Entry-${entry.id}`}>
