@@ -55,70 +55,68 @@ const Signup: React.FC = () => {
   };
 
   return (
-    <div>
-      <Box display="flex" justifyContent="center">
-        <Card variant="outlined" style={{ maxWidth: "400px" }}>
-          <CardHeader
-            title={<Typography variant="h5">Create an Account </Typography>}
-            avatar={
-              <Avatar className={classes.pink}>
-                <ExitToApp />
-              </Avatar>
-            }
-          ></CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <TextField
-                    inputRef={txtUsername}
-                    label="Username"
-                    variant="outlined"
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    inputRef={txtPassword}
-                    label="Password"
-                    variant="outlined"
-                    type="password"
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    inputRef={txtEmail}
-                    label="Email (Optional)"
-                    variant="outlined"
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    type="submit"
-                    fullWidth
-                  >
-                    Sign Up
-                  </Button>
-                </Grid>
-                <Grid item xs={12}>
-                  <Button
-                    fullWidth
-                    style={{ textTransform: "none" }}
-                    onClick={() => navigate("../login", { replace: true })}
-                  >
-                    Aready have an account?
-                  </Button>
-                </Grid>
+    <Box mx="auto" display="flex" justifyContent="center" maxWidth={400}>
+      <Card variant="outlined">
+        <CardHeader
+          title={<Typography variant="h5">Create an Account </Typography>}
+          avatar={
+            <Avatar className={classes.pink}>
+              <ExitToApp />
+            </Avatar>
+          }
+        ></CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  inputRef={txtUsername}
+                  label="Username"
+                  variant="outlined"
+                  fullWidth
+                />
               </Grid>
-            </form>
-          </CardContent>
-        </Card>
-      </Box>
-    </div>
+              <Grid item xs={12}>
+                <TextField
+                  inputRef={txtPassword}
+                  label="Password"
+                  variant="outlined"
+                  type="password"
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  inputRef={txtEmail}
+                  label="Email (Optional)"
+                  variant="outlined"
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  fullWidth
+                >
+                  Sign Up
+                </Button>
+              </Grid>
+              <Grid item xs={12}>
+                <Button
+                  fullWidth
+                  style={{ textTransform: "none" }}
+                  onClick={() => navigate("../login", { replace: true })}
+                >
+                  Aready have an account?
+                </Button>
+              </Grid>
+            </Grid>
+          </form>
+        </CardContent>
+      </Card>
+    </Box>
   );
 };
 

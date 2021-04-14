@@ -32,6 +32,7 @@ import {
   DialogActions,
   DialogTitle,
   DialogContent,
+  useTheme,
 } from "@material-ui/core";
 
 import {
@@ -61,6 +62,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const Entries: React.FC = () => {
+  const theme = useTheme();
   const classes = useStyles();
   const navigate = useNavigate();
   const { selectedDiary, entries, selectedEntry } = useAppSelector(
@@ -215,7 +217,7 @@ const Entries: React.FC = () => {
     <>
       {selectedDiary && (
         <>
-          <Box mx="auto" maxWidth={600}>
+          <Box mx="auto" maxWidth={theme.breakpoints.width("sm")}>
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={10}>
                 <Box display="flex" alignItems="center">

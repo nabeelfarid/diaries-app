@@ -1,4 +1,10 @@
-import { createStyles, Theme, makeStyles } from "@material-ui/core/styles";
+import {
+  createStyles,
+  Theme,
+  makeStyles,
+  useTheme,
+} from "@material-ui/core/styles";
+
 import { useAppSelector, useAppDispatch } from "../hooks";
 import {
   selectDiariesAppState,
@@ -67,7 +73,9 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const Diaries: React.FC = () => {
+  const theme = useTheme();
   const classes = useStyles();
+
   const navigate = useNavigate();
   const { user, diaries, selectedDiary } = useAppSelector(
     selectDiariesAppState
@@ -224,7 +232,7 @@ const Diaries: React.FC = () => {
 
   return (
     <>
-      <Box mx="auto" maxWidth={600}>
+      <Box mx="auto" maxWidth={theme.breakpoints.width("sm")}>
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={6}>
             <Typography variant="h4">Your Diaries</Typography>

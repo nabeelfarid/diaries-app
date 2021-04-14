@@ -68,8 +68,8 @@ const Login: React.FC = () => {
   };
 
   return (
-    <Box display="flex" justifyContent="center">
-      <Card variant="outlined" style={{ maxWidth: "400px" }}>
+    <Box mx="auto" display="flex" justifyContent="center" maxWidth={400}>
+      <Card variant="outlined">
         <CardHeader
           title={<Typography variant="h5">Log in to Your Account </Typography>}
           avatar={
