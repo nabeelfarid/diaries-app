@@ -8,10 +8,10 @@ import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "./store";
 
-if (process.env.NODE_ENV === "development") {
-  console.log("dev environment");
-  MakeServer({ environment: "development" });
-}
+// if (process.env.NODE_ENV === "development") {
+console.log("dev environment");
+MakeServer({ environment: "development" });
+// }
 
 ReactDOM.render(
   <Provider store={store}>
