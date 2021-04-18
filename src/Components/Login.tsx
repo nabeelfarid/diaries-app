@@ -15,7 +15,7 @@ import { LockOpen } from "@material-ui/icons";
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import diariesApi from "../diariesApi";
-import { saveToken, setAuthState, setUser } from "../diariesSlice";
+import { login } from "../diariesSlice";
 import { useAppDispatch } from "../hooks";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
@@ -73,9 +73,7 @@ const Login: React.FC = () => {
                   values.password
                 );
 
-                dispatch(saveToken(user.token));
-                dispatch(setAuthState(true));
-                dispatch(setUser(user));
+                dispatch(login(user));
 
                 navigate(from.pathname, { replace: true });
 
