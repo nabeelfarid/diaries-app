@@ -34,14 +34,12 @@ import {
   ListItemAvatar,
   Avatar,
   Badge,
-  TextField,
   Button,
   Dialog,
   DialogActions,
   DialogTitle,
   DialogContent,
-  FormControlLabel,
-  Switch,
+  CircularProgress,
 } from "@material-ui/core";
 
 import {
@@ -56,6 +54,10 @@ import {
 import { green, pink } from "@material-ui/core/colors";
 import { Diary, ToastType } from "../models";
 import { useNavigate } from "react-router-dom";
+import { Formik, Form, FormikHelpers } from "formik";
+import * as Yup from "yup";
+import FormikMuiTextField from "./FormikMuiTextField";
+import FormikMuiSwitch from "./FormikMuiSwitch";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -85,27 +87,6 @@ const Diaries: React.FC = () => {
     deleteConfirmationDialogOpenCloseState,
     setDeleteConfirmationDialogOpenCloseState,
   ] = React.useState(false);
-  const [formValues, setFormValues] = React.useState(
-    selectedDiary
-      ? {
-          title: selectedDiary.title,
-          subtitle: selectedDiary.subtitle,
-          isPublic: selectedDiary.isPublic,
-        }
-      : { title: "", subtitle: "", isPublic: true }
-  );
-  useEffect(() => {
-    console.log("selectedDiary:", selectedDiary);
-    setFormValues(
-      selectedDiary
-        ? {
-            title: selectedDiary.title,
-            subtitle: selectedDiary.subtitle,
-            isPublic: selectedDiary.isPublic,
-          }
-        : { title: "", subtitle: "", isPublic: true }
-    );
-  }, [open, selectedDiary]);
 
   useEffect(() => {
     const getUserDiaries = async () => {
@@ -148,49 +129,55 @@ const Diaries: React.FC = () => {
     setOpen(false);
   };
 
-  const handleCreateEditSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const createDiary = async () => {
-      if (user) {
-        try {
-          console.log(formValues);
-          let diary: Diary;
-          if (selectedDiary) {
-            diary = await diariesApi.editDiary(
-              selectedDiary.id,
-              formValues.title,
-              formValues.subtitle,
-              formValues.isPublic,
-              user.id
-            );
-            dispatch(updateDiary(diary));
-          } else {
-            diary = await diariesApi.createDiary(
-              formValues.title,
-              formValues.subtitle,
-              formValues.isPublic,
-              user.id
-            );
-            dispatch(addDiary(diary));
-          }
-          dispatch(setSelectedDiary(null));
-          setOpen(false);
-          console.log("Diary created/edit succesfully", diary);
-          dispatch(
-            showToast({
-              type: ToastType.success,
-              open: true,
-              msg: "Diary saved successfully.",
-            })
+  const handleCreateEditSubmit = async (
+    values: {
+      title: string;
+      subtitle: string;
+      isPublic: boolean;
+    },
+    formikHelpers: FormikHelpers<{
+      title: string;
+      subtitle: string;
+      isPublic: boolean;
+    }>
+  ) => {
+    if (user) {
+      try {
+        let diary: Diary;
+        if (selectedDiary) {
+          diary = await diariesApi.editDiary(
+            selectedDiary.id,
+            values.title,
+            values.subtitle,
+            values.isPublic,
+            user.id
           );
-        } catch (error) {
-          console.log("Create/Edit Diary Error", error);
-        } finally {
+          dispatch(updateDiary(diary));
+        } else {
+          diary = await diariesApi.createDiary(
+            values.title,
+            values.subtitle,
+            values.isPublic,
+            user.id
+          );
+          dispatch(addDiary(diary));
         }
+        dispatch(setSelectedDiary(null));
+        console.log("Diary created/edit succesfully", diary);
+        dispatch(
+          showToast({
+            type: ToastType.success,
+            open: true,
+            msg: "Diary saved successfully.",
+          })
+        );
+        setOpen(false);
+      } catch (error) {
+        console.log("Create/Edit Diary Error", error);
+      } finally {
+        formikHelpers.setSubmitting(false);
       }
-    };
-
-    createDiary();
+    }
   };
 
   const handleDelete = (diary: Diary) => {
@@ -330,64 +317,69 @@ const Diaries: React.FC = () => {
             </Typography>
           </Box>
         </DialogTitle>
-        <form onSubmit={handleCreateEditSubmit}>
-          <DialogContent dividers>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TextField
-                  value={formValues.title}
-                  label="Title"
-                  variant="outlined"
-                  fullWidth
-                  autoFocus
-                  onChange={(e) =>
-                    setFormValues({
-                      ...formValues,
-                      title: e.target.value,
-                    })
-                  }
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  value={formValues.subtitle}
-                  label="Subtitle"
-                  variant="outlined"
-                  fullWidth
-                  onChange={(e) =>
-                    setFormValues({
-                      ...formValues,
-                      subtitle: e.target.value,
-                    })
-                  }
-                />
-              </Grid>
-              <Grid item>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={formValues.isPublic}
-                      onChange={(e) =>
-                        setFormValues({
-                          ...formValues,
-                          isPublic: e.target.checked,
-                        })
-                      }
+        <Formik
+          initialValues={
+            selectedDiary
+              ? {
+                  title: selectedDiary.title,
+                  subtitle: selectedDiary.subtitle,
+                  isPublic: selectedDiary.isPublic,
+                }
+              : { title: "", subtitle: "", isPublic: true }
+          }
+          validationSchema={Yup.object({
+            title: Yup.string().required().min(1).max(50),
+            subtitle: Yup.string().min(1).max(50),
+          })}
+          onSubmit={handleCreateEditSubmit}
+        >
+          {(props) => (
+            <Form>
+              <DialogContent dividers>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <FormikMuiTextField
+                      name="title"
+                      label="Title"
+                      variant="outlined"
+                      fullWidth
+                      autoFocus
                     />
-                  }
-                  label="Is it a Public Diary?"
-                />
-              </Grid>
-            </Grid>
-          </DialogContent>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <FormikMuiTextField
+                      name="subtitle"
+                      label="Subtitle"
+                      variant="outlined"
+                      fullWidth
+                    />
+                  </Grid>
+                  <Grid item>
+                    <FormikMuiSwitch
+                      name="isPublic"
+                      label="Is it a Public Diary?"
+                    />
+                  </Grid>
+                </Grid>
+              </DialogContent>
 
-          <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button variant="contained" color="primary" type="submit">
-              Save
-            </Button>
-          </DialogActions>
-        </form>
+              <DialogActions>
+                <Button onClick={handleClose}>Cancel</Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  startIcon={
+                    props.isSubmitting && <CircularProgress size="1rem" />
+                  }
+                  disabled={props.isSubmitting}
+                >
+                  Save
+                </Button>
+              </DialogActions>
+            </Form>
+          )}
+        </Formik>
       </Dialog>
 
       <Dialog
