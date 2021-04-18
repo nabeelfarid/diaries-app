@@ -6,7 +6,7 @@ type FormikMuiTextFieldProps = {
 } & TextFieldProps;
 
 const FormikMuiTextField: React.FC<FormikMuiTextFieldProps> = (props) => {
-  const [field, meta, helper] = useField(props.name);
+  const [field, meta] = useField(props.name);
 
   return (
     <TextField

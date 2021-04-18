@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Routes, Route, Link, Navigate, useLocation } from "react-router-dom";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
@@ -28,7 +28,6 @@ const App = () => {
   let location = useLocation();
 
   const [darkState, setDarkState] = useState(true);
-  // const palletType = darkState ? "dark" : "light";
   const lightPallet: PaletteOptions = {
     type: "light",
   };
@@ -46,31 +45,6 @@ const App = () => {
     setDarkState(!darkState);
   };
 
-  useEffect(() => {
-    const callDiariesApi = async () => {
-      // let response = await fetch("/api/diaries/1", {
-      //   method: "DEL",
-      // });
-      // let data = await response.json();
-      // console.log("deleted diary", data);
-      // response = await fetch("/api/diaries/2", {
-      //   method: "PUT",
-      //   body: JSON.stringify({ title: "an updated diary" }),
-      // });
-      // data = await response.json();
-      // console.log("updated diary", data);
-      // response = await fetch("/api/diaries/", {
-      //   method: "POST",
-      //   body: JSON.stringify({ title: "a new diary" }),
-      // });
-      // data = await response.json();
-      // console.log("new diary", data);
-      // let response = await fetch("/api/diaries/");
-      // let data = await response.json();
-      // console.log("all diaries", data);
-    };
-    callDiariesApi();
-  }, []);
   return (
     <>
       <ThemeProvider theme={theme}>

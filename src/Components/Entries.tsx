@@ -35,14 +35,7 @@ import {
   useTheme,
 } from "@material-ui/core";
 
-import {
-  Edit,
-  Add,
-  Delete,
-  ArrowBack,
-  Replay,
-  Warning,
-} from "@material-ui/icons";
+import { Edit, Add, Delete, ArrowBack, Warning } from "@material-ui/icons";
 import { green, pink } from "@material-ui/core/colors";
 import { Entry, ToastType } from "../models";
 import { useNavigate, useParams } from "react-router-dom";

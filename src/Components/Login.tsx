@@ -83,6 +83,7 @@ const Login: React.FC = () => {
               } catch (error) {
                 console.log("login error", error);
                 helpers.setSubmitting(false);
+                helpers.resetForm();
               } finally {
               }
             }}
@@ -133,8 +134,8 @@ const Login: React.FC = () => {
                     </Button>
                   </Grid>
                 </Grid>
-                <pre>{JSON.stringify(props.errors, null, 4)}</pre>
-                <pre>{JSON.stringify(props.values, null, 4)}</pre>
+                {/* <pre>{JSON.stringify(props.errors, null, 4)}</pre>
+                <pre>{JSON.stringify(props.values, null, 4)}</pre> */}
               </Form>
             )}
           </Formik>

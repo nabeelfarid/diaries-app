@@ -16,7 +16,7 @@ import {
   setEntries,
   showToast,
 } from "../diariesSlice";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import diariesApi from "../diariesApi";
 import {
   Box,
@@ -56,7 +56,6 @@ import {
 import { green, pink } from "@material-ui/core/colors";
 import { Diary, ToastType } from "../models";
 import { useNavigate } from "react-router-dom";
-import { Alert } from "@material-ui/lab";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -106,7 +105,7 @@ const Diaries: React.FC = () => {
           }
         : { title: "", subtitle: "", isPublic: true }
     );
-  }, [open]);
+  }, [open, selectedDiary]);
 
   useEffect(() => {
     const getUserDiaries = async () => {

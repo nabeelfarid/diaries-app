@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Diary, Entry, Toast, ToastType, User } from "./models";
+import { Diary, Entry, Toast, User } from "./models";
 import type { RootState } from "./store";
 
 // Type for the slice state
