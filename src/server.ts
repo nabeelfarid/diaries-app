@@ -132,7 +132,8 @@ const MakeServer = ({ environment = "test" } = {}) => {
         if (xUser) {
           return handleErrors({
             code: 401,
-            message: "Username already taken. Chose a different username.",
+            message:
+              "Username already taken. Please choose a different username.",
           });
         }
         let user = schema.users.create({
