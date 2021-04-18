@@ -12,15 +12,15 @@ import {
   Switch,
   Tooltip,
 } from "@material-ui/core";
-import { GitHub } from "@material-ui/icons";
+import { GitHub, PowerSettingsNew } from "@material-ui/icons";
 import Diaries from "./Components/Diaries";
 import Entries from "./Components/Entries";
 import About from "./Components/About";
 import Login from "./Components/Login";
 import Signup from "./Components/Signup";
 import ToastAlert from "./Components/ToastAlert";
-import { useAppSelector } from "./hooks";
-import { selectDiariesAppState } from "./diariesSlice";
+import { useAppDispatch, useAppSelector } from "./hooks";
+import { logout, selectDiariesAppState } from "./diariesSlice";
 import { lightBlue } from "@material-ui/core/colors";
 import { PaletteOptions } from "@material-ui/core/styles/createPalette";
 
@@ -40,6 +40,7 @@ const App = () => {
   });
 
   const { isAuthenticated } = useAppSelector(selectDiariesAppState);
+  const dispatch = useAppDispatch();
 
   const handleThemeChange = () => {
     setDarkState(!darkState);
@@ -73,6 +74,18 @@ const App = () => {
                     <GitHub />
                   </IconButton>
                 </Tooltip>
+                {isAuthenticated && (
+                  <Tooltip title="Logout">
+                    <IconButton
+                      aria-label="logout"
+                      onClick={() => {
+                        dispatch(logout());
+                      }}
+                    >
+                      <PowerSettingsNew />
+                    </IconButton>
+                  </Tooltip>
+                )}
               </Toolbar>
             </AppBar>
             <Container>

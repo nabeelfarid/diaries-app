@@ -2,9 +2,9 @@ import { createStyles, makeStyles } from "@material-ui/core/styles";
 import { useAppSelector, useAppDispatch } from "../hooks";
 import {
   selectDiariesAppState,
-  addDiary,
-  updateDiary,
   showToast,
+  updateEntry,
+  addEntry,
 } from "../diariesSlice";
 import React from "react";
 import diariesApi from "../diariesApi";
@@ -20,15 +20,14 @@ import {
   DialogContent,
   CircularProgress,
 } from "@material-ui/core";
-import { Edit, Add } from "@material-ui/icons";
+import { Add } from "@material-ui/icons";
 import { green, pink } from "@material-ui/core/colors";
 import { Formik, Form, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import FormikMuiTextField from "./FormikMuiTextField";
-import FormikMuiSwitch from "./FormikMuiSwitch";
-import { Diary, ToastType } from "../models";
+import { Entry, ToastType } from "../models";
 
-interface DiaryCreateEditProps {
+interface EntryCreateEditProps {
   open: boolean;
   handleClose: () => void;
 }
@@ -47,58 +46,56 @@ const useStyles = makeStyles(() =>
   })
 );
 
-const DiaryCreateEdit: React.FC<DiaryCreateEditProps> = ({
+const EntryCreateEdit: React.FC<EntryCreateEditProps> = ({
   open,
   handleClose,
 }) => {
   const classes = useStyles();
-  const { user, selectedDiary } = useAppSelector(selectDiariesAppState);
+  const { selectedDiary, selectedEntry } = useAppSelector(
+    selectDiariesAppState
+  );
   const dispatch = useAppDispatch();
 
-  const handleCreateEditSubmit = async (
+  const handleSubmit = async (
     values: {
       title: string;
-      subtitle: string;
-      isPublic: boolean;
+      content: string;
     },
     formikHelpers: FormikHelpers<{
       title: string;
-      subtitle: string;
-      isPublic: boolean;
+      content: string;
     }>
   ) => {
-    if (user) {
+    if (selectedDiary) {
       try {
-        let diary: Diary;
-        if (selectedDiary) {
-          diary = await diariesApi.editDiary(
-            selectedDiary.id,
+        let entry: Entry;
+        if (selectedEntry) {
+          entry = await diariesApi.editEntry(
+            selectedEntry.id,
             values.title,
-            values.subtitle,
-            values.isPublic,
-            user.id
+            values.content
           );
-          dispatch(updateDiary(diary));
+          dispatch(updateEntry(entry));
         } else {
-          diary = await diariesApi.createDiary(
+          entry = await diariesApi.createEntry(
             values.title,
-            values.subtitle,
-            values.isPublic,
-            user.id
+            values.content,
+            selectedDiary.id
           );
-          dispatch(addDiary(diary));
+          dispatch(addEntry(entry));
         }
-        console.log("Diary created/edit succesfully", diary);
+
+        console.log("Entry created/edit succesfully", entry);
         dispatch(
           showToast({
             type: ToastType.success,
             open: true,
-            msg: "Diary saved successfully.",
+            msg: "Entry saved successfully.",
           })
         );
         handleClose();
       } catch (error) {
-        console.log("Create/Edit Diary Error", error);
+        console.log("Create/Edit Entry Error", error);
       } finally {
         formikHelpers.setSubmitting(false);
       }
@@ -109,37 +106,35 @@ const DiaryCreateEdit: React.FC<DiaryCreateEditProps> = ({
     <Dialog
       open={open}
       onClose={handleClose}
-      aria-labelledby="create-edit-diary"
+      aria-labelledby="create-edit-entry"
     >
       <DialogTitle>
         <Box display="flex" alignItems="center">
           <Box mr={2}>
             <Avatar className={classes.green}>
-              {selectedDiary ? <Edit /> : <Add />}
+              <Add />
             </Avatar>
           </Box>
           <Typography variant="h5">
-            {selectedDiary
-              ? `Edit Diary: ${selectedDiary.title}`
-              : `Create New Diary`}
+            {selectedEntry
+              ? `Edit Entry: ${selectedEntry.title}`
+              : `Create New Entry`}
           </Typography>
         </Box>
       </DialogTitle>
       <Formik
         initialValues={
-          selectedDiary
+          selectedEntry
             ? {
-                title: selectedDiary.title,
-                subtitle: selectedDiary.subtitle,
-                isPublic: selectedDiary.isPublic,
+                title: selectedEntry.title,
+                content: selectedEntry.content,
               }
-            : { title: "", subtitle: "", isPublic: true }
+            : { title: "", content: "" }
         }
         validationSchema={Yup.object({
           title: Yup.string().required().min(1).max(50),
-          subtitle: Yup.string().min(1).max(50),
         })}
-        onSubmit={handleCreateEditSubmit}
+        onSubmit={handleSubmit}
       >
         {(props) => (
           <Form>
@@ -156,16 +151,13 @@ const DiaryCreateEdit: React.FC<DiaryCreateEditProps> = ({
                 </Grid>
                 <Grid item xs={12}>
                   <FormikMuiTextField
-                    name="subtitle"
-                    label="Subtitle"
+                    name="content"
+                    multiline
+                    rows={4}
+                    rowsMax={10}
+                    label="Content"
                     variant="outlined"
                     fullWidth
-                  />
-                </Grid>
-                <Grid item>
-                  <FormikMuiSwitch
-                    name="isPublic"
-                    label="Is it a Public Diary?"
                   />
                 </Grid>
               </Grid>
@@ -194,4 +186,4 @@ const DiaryCreateEdit: React.FC<DiaryCreateEditProps> = ({
   );
 };
 
-export default DiaryCreateEdit;
+export default EntryCreateEdit;

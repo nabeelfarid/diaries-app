@@ -12,9 +12,8 @@ import {
 } from "@material-ui/core";
 import { pink } from "@material-ui/core/colors";
 import { ExitToApp } from "@material-ui/icons";
-import { useRef } from "react";
 import diariesApi from "../diariesApi";
-import { saveToken, setAuthState, setUser } from "../diariesSlice";
+import { login } from "../diariesSlice";
 import { useAppDispatch } from "../hooks";
 import { useNavigate } from "react-router-dom";
 import { Formik, Form } from "formik";
@@ -69,9 +68,7 @@ const Signup: React.FC = () => {
                   values.email
                 );
                 console.log("token:", user.token);
-                dispatch(saveToken(user.token));
-                dispatch(setAuthState(true));
-                dispatch(setUser(user));
+                dispatch(login(user));
 
                 console.log("signup succesfull", user);
               } catch (error) {

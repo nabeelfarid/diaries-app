@@ -32,10 +32,6 @@ import {
   ListItemAvatar,
   Avatar,
   Badge,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
 } from "@material-ui/core";
 
 import {
@@ -45,7 +41,6 @@ import {
   Delete,
   Lock,
   Public,
-  Warning,
 } from "@material-ui/icons";
 import { green, pink } from "@material-ui/core/colors";
 import { Diary, ToastType } from "../models";

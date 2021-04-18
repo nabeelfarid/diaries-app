@@ -1,6 +1,6 @@
 import { createStyles, makeStyles } from "@material-ui/core/styles";
 
-import React, { useState } from "react";
+import React from "react";
 import {
   Box,
   Typography,

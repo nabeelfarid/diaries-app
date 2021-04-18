@@ -1,16 +1,13 @@
-import { createStyles, Theme, makeStyles } from "@material-ui/core/styles";
 import { useAppSelector, useAppDispatch } from "../hooks";
 import {
   selectDiariesAppState,
   setSelectedDiary,
   setEntries,
   setSelectedEntry,
-  addEntry,
-  updateEntry,
   deleteEntry,
   showToast,
 } from "../diariesSlice";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import diariesApi from "../diariesApi";
 import {
   Box,
@@ -25,38 +22,18 @@ import {
   List,
   ListItem,
   ListItemText,
-  Avatar,
-  TextField,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogTitle,
-  DialogContent,
   useTheme,
 } from "@material-ui/core";
 
-import { Edit, Add, Delete, ArrowBack, Warning } from "@material-ui/icons";
-import { green, pink } from "@material-ui/core/colors";
+import { Edit, Add, Delete, ArrowBack } from "@material-ui/icons";
 import { Entry, ToastType } from "../models";
 import { useNavigate, useParams } from "react-router-dom";
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {},
-    green: {
-      color: "#fff",
-      backgroundColor: green[500],
-    },
-    pink: {
-      color: "#fff",
-      backgroundColor: pink[500],
-    },
-  })
-);
+import ConfirmationDialog from "./ConfirmationDialog";
+import EntryCreateEdit from "./EntryCreateEdit";
 
 const Entries: React.FC = () => {
   const theme = useTheme();
-  const classes = useStyles();
   const navigate = useNavigate();
   const { selectedDiary, entries, selectedEntry } = useAppSelector(
     selectDiariesAppState
@@ -66,11 +43,13 @@ const Entries: React.FC = () => {
 
   const [open, setOpen] = React.useState(false);
   const [
-    deleteConfirmationDialogOpenCloseState,
-    setDeleteConfirmationDialogOpenCloseState,
+    confirmationDialogOpenState,
+    setConfirmationDialogOpenState,
   ] = React.useState(false);
-  const txtTitle = useRef<HTMLInputElement>(null);
-  const txtContent = useRef<HTMLInputElement>(null);
+  const [
+    confirmationDialogDisableState,
+    setConfirmationDialogDisableState,
+  ] = React.useState(false);
 
   useEffect(() => {
     const getEntries = async () => {
@@ -118,6 +97,7 @@ const Entries: React.FC = () => {
   };
 
   const handleClose = () => {
+    dispatch(setSelectedEntry(null));
     setOpen(false);
   };
 
@@ -125,69 +105,25 @@ const Entries: React.FC = () => {
     navigate("/diaries", { replace: true });
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const createEntry = async () => {
-      if (selectedDiary) {
-        try {
-          let title = txtTitle.current?.value as string;
-          let content = txtContent.current?.value as string;
-
-          console.log(title, content);
-          let entry: Entry;
-          if (selectedEntry) {
-            entry = await diariesApi.editEntry(
-              selectedEntry.id,
-              title,
-              content
-            );
-            dispatch(updateEntry(entry));
-          } else {
-            entry = await diariesApi.createEntry(
-              title,
-              content,
-              selectedDiary.id
-            );
-            dispatch(addEntry(entry));
-          }
-          dispatch(setSelectedEntry(null));
-          setOpen(false);
-          console.log("Entry created/edit succesfully", entry);
-          dispatch(
-            showToast({
-              type: ToastType.success,
-              open: true,
-              msg: "Entry saved successfully.",
-            })
-          );
-        } catch (error) {
-          console.log("Create/Edit Entry Error", error);
-        } finally {
-        }
-      }
-    };
-
-    createEntry();
-  };
-
   const handleDelete = (entry: Entry) => {
     dispatch(setSelectedEntry(entry));
-    setDeleteConfirmationDialogOpenCloseState(true);
+    setConfirmationDialogOpenState(true);
   };
 
-  const handleDeleteConfirmationDialogClose = () => {
+  const handleConfirmationDialogClose = () => {
     dispatch(setSelectedEntry(null));
-    setDeleteConfirmationDialogOpenCloseState(false);
+    setConfirmationDialogOpenState(false);
   };
 
   const handleConfirmDelete = () => {
     const delEntry = async () => {
       if (selectedEntry) {
         try {
+          setConfirmationDialogDisableState(true);
           let entry = await diariesApi.deleteEntry(selectedEntry.id);
           dispatch(deleteEntry(entry));
           dispatch(setSelectedEntry(null));
-          setDeleteConfirmationDialogOpenCloseState(false);
+          setConfirmationDialogOpenState(false);
           console.log("Entry deleted succesfully", entry);
           dispatch(
             showToast({
@@ -199,6 +135,7 @@ const Entries: React.FC = () => {
         } catch (error) {
           console.log("Delete Entry Error", error);
         } finally {
+          setConfirmationDialogDisableState(false);
         }
       }
     };
@@ -285,97 +222,14 @@ const Entries: React.FC = () => {
             </Grid>
           </Box>
 
-          <Dialog
-            open={open}
-            onClose={handleClose}
-            aria-labelledby="create-new-entry"
-          >
-            <DialogTitle id="form-dialog-create-new-entry">
-              <Box display="flex" alignItems="center">
-                <Box mr={2}>
-                  <Avatar className={classes.green}>
-                    <Add />
-                  </Avatar>
-                </Box>
-                <Typography variant="h5">
-                  {selectedDiary
-                    ? `Edit Entry: ${selectedDiary.title}`
-                    : `Create New Entry`}
-                </Typography>
-              </Box>
-            </DialogTitle>
-            <form onSubmit={handleSubmit} autoComplete="off">
-              <DialogContent dividers>
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <TextField
-                      inputRef={txtTitle}
-                      label="Title"
-                      variant="outlined"
-                      fullWidth
-                      defaultValue={selectedEntry ? selectedEntry.title : ``}
-                      autoFocus
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      multiline
-                      rows={4}
-                      rowsMax={10}
-                      inputRef={txtContent}
-                      label="Content"
-                      variant="outlined"
-                      fullWidth
-                      defaultValue={selectedEntry ? selectedEntry.content : ``}
-                    />
-                  </Grid>
-                </Grid>
-              </DialogContent>
+          <EntryCreateEdit open={open} handleClose={handleClose} />
 
-              {/* </Box> */}
-              <DialogActions>
-                <Button onClick={handleClose}>Cancel</Button>
-                <Button variant="contained" color="primary" type="submit">
-                  Save
-                </Button>
-              </DialogActions>
-            </form>
-          </Dialog>
-
-          <Dialog
-            open={deleteConfirmationDialogOpenCloseState}
-            onClose={handleDeleteConfirmationDialogClose}
-            aria-labelledby="delete-entry"
-          >
-            <DialogTitle id="form-dialog-delete-entry">
-              <Box display="flex" alignItems="center">
-                <Box mr={2}>
-                  <Avatar className={classes.pink}>
-                    <Warning />
-                  </Avatar>
-                </Box>
-                <Typography variant="h5">Are you sure?</Typography>
-              </Box>
-            </DialogTitle>
-            <DialogContent>
-              <Box mb={2} textAlign="center">
-                <Button
-                  style={{ marginRight: "16px" }}
-                  variant="outlined"
-                  onClick={handleDeleteConfirmationDialogClose}
-                >
-                  No
-                </Button>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleConfirmDelete}
-                >
-                  Yes
-                </Button>
-              </Box>
-            </DialogContent>
-          </Dialog>
+          <ConfirmationDialog
+            open={confirmationDialogOpenState}
+            disable={confirmationDialogDisableState}
+            handleNo={handleConfirmationDialogClose}
+            handleYes={handleConfirmDelete}
+          />
         </>
       )}
     </>

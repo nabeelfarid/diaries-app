@@ -141,6 +141,24 @@ const MakeServer = ({ environment = "test" } = {}) => {
           password: data.password,
           email: data.email,
         });
+        let diary = user.createDiary({
+          title: "Sample Diary",
+          subtitle: "My very first diary",
+          created: Date.now(),
+          updated: Date.now(),
+        });
+        diary.createEntry({
+          title: "Hello World",
+          content: "Maybe I should write something useful",
+          created: Date.now(),
+          updated: Date.now(),
+        });
+        diary.createEntry({
+          title: "React vs Angular",
+          content: "A never ending debate",
+          created: Date.now(),
+          updated: Date.now(),
+        });
         return { token: "some token", ...user.attrs };
       });
 
